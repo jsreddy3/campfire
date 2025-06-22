@@ -1,6 +1,6 @@
 import enum, uuid
 from datetime import datetime
-from sqlalchemy import Column, Enum, DateTime, String, Text, Float, Integer, ForeignKey
+from sqlalchemy import Column, Enum, DateTime, String, Text, Float, Integer, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -19,6 +19,8 @@ class Dream(Base):
     title     = Column(String(255), nullable=False)
     transcript= Column(Text)
     state     = Column(Enum(DreamState), default=DreamState.draft, nullable=False)
+    video_s3_key = Column(String(512), nullable=True)
+    video_metadata = Column(JSON, nullable=True)
 
     segments  = relationship(
         "AudioSegment",

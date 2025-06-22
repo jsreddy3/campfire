@@ -121,6 +121,32 @@ async def list_segments(
         raise HTTPException(404, "Dream not found")
     return dream.segments
 
+@app.get("/dreams/{dream_id}/video-url/")
+async def get_video_url(dream_id: str, db: AsyncSession = Depends(get_db)):
+    """Get a pre-signed URL for downloading the video"""
+    dream = await crud.get_dream(db, dream_id)
+    if not dream:
+        raise HTTPException(404, "Dream not found")
+    
+    if not dream.video_s3_key:
+        raise HTTPException(404, "Video not found for this dream")
+    
+    # Generate pre-signed URL valid for 1 hour
+    presigned_url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={
+            'Bucket': bucket_name,
+            'Key': dream.video_s3_key,
+        },
+        ExpiresIn=3600  # 1 hour
+    )
+    
+    return {
+        "video_url": presigned_url,
+        "expires_in": 3600,
+        "metadata": dream.video_metadata
+    }
+
 @app.post("/dreams/{dream_id}/upload-url/")
 async def get_upload_url(dream_id: str, filename: str):
     """Generate a pre-signed URL for uploading to S3"""

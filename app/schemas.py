@@ -1,7 +1,7 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
 from datetime import datetime
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 
 class AudioSegmentBase(BaseModel):
     filename: str
@@ -16,12 +16,12 @@ class AudioSegmentRead(AudioSegmentBase):
     segment_id: Union[UUID, str] = Field(alias="id")
     transcript: Optional[str] = None
 
-    model_config = ConfigDict(
-        from_attributes=True,
+    class Config:
+        orm_mode = True
         json_encoders = {
-            datetime: lambda dt: dt.isoformat(timespec="seconds") + "Z"
+            datetime: lambda dt: dt.isoformat(timespec="seconds") + "Z",
+            UUID: lambda v: str(v)
         }
-    )
 
 class DreamBase(BaseModel):
     title: str
@@ -36,16 +36,18 @@ class DreamUpdate(DreamBase):
 class DreamRead(DreamBase):
     id: Union[UUID, str]
     created: datetime
-    transcript: Optional[str]
+    transcript: Optional[str] = None
     state: str
     segments: List[AudioSegmentRead] = []
+    video_s3_key: Optional[str] = None
+    video_metadata: Optional[Dict[str, Any]] = None
 
-    model_config = ConfigDict(
-        from_attributes=True,
+    class Config:
+        orm_mode = True
         json_encoders = {
-            datetime: lambda dt: dt.isoformat(timespec="seconds") + "Z"
+            datetime: lambda dt: dt.isoformat(timespec="seconds") + "Z",
+            UUID: lambda v: str(v)
         }
-    )
 
 class TranscriptRead(BaseModel):
     transcript: str
