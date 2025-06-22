@@ -1,2 +1,4 @@
 .env
 app/
+*.mp4
+*.pyc

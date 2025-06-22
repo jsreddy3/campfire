@@ -7,3 +7,10 @@ python-dotenv
 pydantic[email]
 boto3
 httpx
+# Video generation dependencies
+openai
+aiohttp
+aiofiles
+pyyaml
+Pillow
+python-multipart

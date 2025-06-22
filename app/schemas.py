@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, Field
@@ -39,6 +39,8 @@ class DreamRead(DreamBase):
     transcript: Optional[str] = None
     state: str
     segments: List[AudioSegmentRead] = []
+    video_s3_key: Optional[str] = None
+    video_metadata: Optional[Dict[str, Any]] = None
 
     class Config:
         orm_mode = True
