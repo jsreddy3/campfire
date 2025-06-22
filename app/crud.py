@@ -23,7 +23,8 @@ async def create_dream(db: AsyncSession, dream_in: schemas.DreamCreate) -> model
         await db.commit()                       # succeeds first time
     except IntegrityError:
         await db.rollback()                     # someone beat us—treat as success
-    await db.refresh(dream)
+    # ensure segments relationship is loaded to avoid lazy-loading in response model
+    await db.refresh(dream, attribute_names=["segments"])
     return dream
 
 async def get_dream(db: AsyncSession, dream_id: str) -> models.Dream | None:
