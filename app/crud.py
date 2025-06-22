@@ -4,26 +4,42 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from . import models, schemas
 from sqlalchemy.exc import IntegrityError
+from fastapi import Response
 
 # Dream ----------------------------------------------------------------
 async def create_dream(db: AsyncSession, dream_in: schemas.DreamCreate) -> models.Dream:
+    # Generate UUID if not provided
+    dream_id = dream_in.id or uuid.uuid4()
+    
     # if the row is already there, return it and bail
     stmt = (
         select(models.Dream)
-        .where(models.Dream.id == dream_in.id)
+        .where(models.Dream.id == dream_id)
         .options(selectinload(models.Dream.segments))
     )
     if (existing := (await db.execute(stmt)).scalars().first()):
         return existing                         # idempotent path
 
     # otherwise create as you did before
-    dream = models.Dream(id=dream_in.id, title=dream_in.title)
+    dream = models.Dream(id=dream_id, title=dream_in.title)
     db.add(dream)
     try:
         await db.commit()                       # succeeds first time
     except IntegrityError:
         await db.rollback()                     # someone beat us—treat as success
-    await db.refresh(dream)
+    
+    # Always reload with relationships to ensure proper serialization
+    stmt = (
+        select(models.Dream)
+        .where(models.Dream.id == dream_id)
+        .options(selectinload(models.Dream.segments))
+    )
+    result = await db.execute(stmt)
+    dream = result.scalars().first()
+    
+    if not dream:
+        raise ValueError(f"Dream with id {dream_id} not found after creation")
+    
     return dream
 
 async def get_dream(db: AsyncSession, dream_id: str) -> models.Dream | None:
