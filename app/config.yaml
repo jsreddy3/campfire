@@ -1,0 +1,45 @@
+pipeline:
+  scene_parsing:
+    model: "gpt-4o-mini"
+    max_scenes: 2
+    min_scenes: 1
+    scene_duration_seconds: 5
+    prompt_template: |
+      You are analyzing a dream description to create distinct visual scenes.
+      Break this dream into {min_scenes}-{max_scenes} distinct visual scenes.
+      Each scene should be a static moment that can be illustrated as a single image.
+      Focus on the most visually striking and emotionally significant moments.
+  
+  image_generation:
+    model: "dall-e-2"
+    size: "256x256"
+    quality: "standard"
+    style: "vivid"
+    sequential: false
+  
+  audio_generation:
+    model: "gpt-4o-mini-tts"
+    voice: "onyx"
+    speed: 1.0
+    instructions: "Dramatic storytelling, fantasy, deep voice, British cool guy, but also not annoying guy. wizard, old, documentary style but also a little funny and creepy"
+  
+  video_compilation:
+    resolution: "1920x1080"
+    fps: 30
+    subtitle_style: "modern"
+    subtitle_display_mode: "static"  # "kinetic" or "static"
+    subtitle_timing_offset: -0.1  # Offset in seconds (negative = earlier)
+    subtitle_font_size: 72  # Font size for subtitles
+    transitions: true
+    fade_duration_seconds: 0.5
+    output_format: "mp4"
+    
+storage:
+  backend: "local"
+  local_path: "./output"
+  cleanup_after_hours: 24
+
+api:
+  max_dream_length: 1000
+  rate_limit_per_minute: 10
+  job_timeout_minutes: 5

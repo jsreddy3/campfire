@@ -1,4 +1,6 @@
 .env
-app/
 *.mp4
 *.pyc
+__pycache__/
+migrations/versions*
+output/
